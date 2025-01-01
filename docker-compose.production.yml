@@ -3,9 +3,8 @@ version: '3.9'
 services:
   frontend:
     image: credo7/kittygram_frontend:latest
+    restart: always
     container_name: kittygram_frontend
-    ports:
-      - "8000:8000"
     depends_on:
       - backend
     env_file: .env
@@ -16,9 +15,8 @@ services:
 
   backend:
     image: credo7/kittygram_backend:latest
+    restart: always
     container_name: kittygram_backend
-    ports:
-      - "8000:8000"
     depends_on:
       - postgres
     env_file: .env
@@ -30,6 +28,7 @@ services:
 
   gateway:
     image: credo7/kittygram_gateway:latest
+    restart: always
     container_name: kittygram_gateway
     ports:
       - "80:80"
@@ -44,9 +43,8 @@ services:
 
   postgres:
     image: postgres:13
+    restart: always
     container_name: postgres
-    ports:
-      - "5432:5432"
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
