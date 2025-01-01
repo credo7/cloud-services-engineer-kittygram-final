@@ -1,3 +1,3 @@
 repo_owner: credo7
-kittygram_domain: полная ссылка (http://<ip-адрес вашей ВМ>:<порт gateway>) на ваш проект Kittygram
+kittygram_domain: http://51.250.47.0
 dockerhub_username: credo7
