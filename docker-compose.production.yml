@@ -30,7 +30,7 @@ services:
     image: credo7/kittygram_frontend:latest
     container_name: frontend
     volumes:
-      - static:/app/build
+      - frontend_build:/app/build/
     depends_on:
       - backend
     networks:
@@ -43,8 +43,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - static:/static
-      - media:/media
+      - frontend_build:/usr/share/nginx/html/
+      - static:/var/html/static/
+      - media:/var/html/media/
     networks:
       - kittygram_network
     restart: always
@@ -53,6 +54,7 @@ volumes:
   static:
   media:
   pg_data:
+  frontend_build:
 
 networks:
   kittygram_network:
