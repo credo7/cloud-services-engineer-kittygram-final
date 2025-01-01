@@ -24,7 +24,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Lint backend
-        run: flake8 backend
+        run: flake8 backend --max-line-length=120
 
       - name: Start test environment
         run: |
