@@ -82,19 +82,19 @@ jobs:
             cd ./kittygram
             
             echo "⬇️ Pulling the latest Docker images"
-            docker-compose -f docker-compose.production.yml pull
+            sudo docker-compose -f docker-compose.production.yml pull
             
             echo "🛑 Stopping any running containers"
-            docker-compose -f docker-compose.production.yml down
+            sudo docker-compose -f docker-compose.production.yml down
             
             echo "🚀 Starting the new containers"
-            docker-compose -f docker-compose.production.yml up -d
+            sudo docker-compose -f docker-compose.production.yml up -d
             
             echo "📦 Collecting static files"
-            docker-compose -f docker-compose.production.yml exec -T backend python manage.py collectstatic --noinput
+            sudo docker-compose -f docker-compose.production.yml exec -T backend python manage.py collectstatic --noinput
             
             echo "🔄 Running database migrations"
-            docker-compose -f docker-compose.production.yml exec -T backend python manage.py migrate
+            sudo docker-compose -f docker-compose.production.yml exec -T backend python manage.py migrate
             
             echo "✅ Deployment completed successfully!"
 
