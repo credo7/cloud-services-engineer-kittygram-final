@@ -79,7 +79,7 @@ jobs:
             set -e  # Stop on any error
 
             echo "💻 Navigating to the deployment directory"
-            cd /kittygram
+            cd ./kittygram
 
             echo "⬇️ Pulling the latest Docker images"
             docker-compose pull
