@@ -2,12 +2,10 @@ version: '3.9'
 
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: credo7/kittygram_frontend:latest
     container_name: kittygram_frontend
     ports:
-      - "3000:3000"
+      - "8000:8000"
     depends_on:
       - backend
     env_file: .env
@@ -17,9 +15,7 @@ services:
       - kittygram_network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: credo7/kittygram_backend:latest
     container_name: kittygram_backend
     ports:
       - "8000:8000"
@@ -33,9 +29,7 @@ services:
       - kittygram_network
 
   gateway:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
+    image: credo7/kittygram_gateway:latest
     container_name: kittygram_gateway
     ports:
       - "80:80"
