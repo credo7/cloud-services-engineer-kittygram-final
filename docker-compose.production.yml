@@ -1,61 +1,59 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  frontend:
-    image: credo7/kittygram_frontend:latest
-    restart: always
-    container_name: kittygram_frontend
-    depends_on:
-      - backend
-    env_file: .env
-    volumes:
-      - static:/app/static
-    networks:
-      - kittygram_network
-
-  backend:
-    image: credo7/kittygram_backend:latest
-    restart: always
-    container_name: kittygram_backend
-    depends_on:
-      - postgres
-    env_file: .env
-    volumes:
-      - static:/app/static
-      - media:/app/media
-    networks:
-      - kittygram_network
-
-  gateway:
-    image: credo7/kittygram_gateway:latest
-    restart: always
-    container_name: kittygram_gateway
-    ports:
-      - "80:80"
-    depends_on:
-      - frontend
-      - backend
-    volumes:
-      - static:/app/static
-      - media:/app/media
-    networks:
-      - kittygram_network
-
   postgres:
-    image: postgres:13
-    restart: always
+    image: postgres:13.10
     container_name: postgres
-    env_file: .env
+    env_file:
+      - .env
     volumes:
       - pg_data:/var/lib/postgresql/data
     networks:
       - kittygram_network
+    restart: always
 
-networks:
-  kittygram_network:
-    driver: bridge
+  backend:
+    image: credo7/kittygram_backend:latest
+    container_name: backend
+    volumes:
+      - media:/app/media
+      - static:/app/collected_static
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    networks:
+      - kittygram_network
+    restart: always
+
+  frontend:
+    image: credo7/kittygram_frontend:latest
+    container_name: frontend
+    volumes:
+      - static:/app/build
+    depends_on:
+      - backend
+    networks:
+      - kittygram_network
+    restart: always
+
+  gateway:
+    image: credo7/kittygram_gateway:latest
+    container_name: gateway
+    ports:
+      - "80:80"
+    volumes:
+      - static:/static
+      - media:/media
+    networks:
+      - kittygram_network
+    restart: always
 
 volumes:
   static:
   media:
   pg_data:
+
+networks:
+  kittygram_network:
+    driver: bridge
