@@ -77,25 +77,25 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e  # Stop on any error
-            
+
             echo "💻 Navigating to the deployment directory"
             cd ./kittygram
-            
+
             echo "⬇️ Pulling the latest Docker images"
             sudo docker-compose -f docker-compose.production.yml pull
-            
+
             echo "🛑 Stopping any running containers"
             sudo docker-compose -f docker-compose.production.yml down
-            
+
             echo "🚀 Starting the new containers"
             sudo docker-compose -f docker-compose.production.yml up -d
-            
+
             echo "📦 Collecting static files"
             sudo docker-compose -f docker-compose.production.yml exec -T backend python manage.py collectstatic --noinput
-            
+
             echo "🔄 Running database migrations"
             sudo docker-compose -f docker-compose.production.yml exec -T backend python manage.py migrate
-            
+
             echo "✅ Deployment completed successfully!"
 
   auto_tests:
