@@ -88,7 +88,7 @@ jobs:
             docker-compose down
 
             echo "🚀 Starting the new containers"
-            docker-compose up -d
+            docker-compose -f docker-compose.production.yml up -d
 
             echo "📦 Collecting static files"
             docker-compose exec -T backend python manage.py collectstatic --noinput
