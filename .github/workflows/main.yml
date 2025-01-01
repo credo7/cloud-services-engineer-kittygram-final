@@ -21,7 +21,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install flake8 pytest
-          pip install -r backend/requirements.txt
 
       - name: Lint backend
         run: flake8 backend --max-line-length=120
@@ -38,7 +37,7 @@ jobs:
           sleep 15  # Wait for services to be ready
 
       - name: Run backend tests
-        run: pytest backend/tests
+        run: pytest tests
 
       - name: Stop test environment
         run: docker-compose down
