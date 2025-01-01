@@ -9,12 +9,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD sh -c " \
-    echo '🔄 Running migrations...' && \
-    python manage.py makemigrations --merge || true && \
-    python manage.py migrate --noinput && \
-    echo '📦 Collecting static files...' && \
-    python manage.py collectstatic --noinput && \
-    echo '🚀 Starting backend app...' && \
-    python manage.py runserver 0.0.0.0:8000 \
-"
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
