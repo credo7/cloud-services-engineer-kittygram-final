@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  lint-and-test:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,12 @@ jobs:
       - name: Lint backend
         run: flake8 backend --max-line-length=120
 
+      - name: Set up Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
       - name: Start test environment
         run: |
           docker-compose -f docker-compose.production.yml up -d
@@ -38,7 +44,7 @@ jobs:
         run: docker-compose down
 
   build-and-push-images:
-    needs: lint-and-test
+    needs: tests
     runs-on: ubuntu-latest
 
     steps:
