@@ -86,6 +86,9 @@ jobs:
 
             echo "🛑 Stopping any running containers"
             sudo docker-compose -f docker-compose.production.yml down
+            
+            echo "🗑️ Removing the static volume if it exists"
+            sudo docker volume rm kittygram_static || true
 
             echo "🚀 Starting the new containers"
             sudo docker-compose -f docker-compose.production.yml up -d
