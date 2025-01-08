@@ -45,6 +45,9 @@ services:
     volumes:
       - static:/static
       - media:/media
+    depends_on:
+      - backend
+      - frontend
     networks:
       - kittygram_network
     restart: always

@@ -1,4 +1,4 @@
-export const URL = "http://gateway/"
+export const URL = "http://51.250.47.0"
 
 export const colorsList = [
   "#FFE4C4",
