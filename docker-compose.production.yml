@@ -17,7 +17,7 @@ services:
     container_name: backend
     volumes:
       - media:/app/media
-      - static:/app/collected_static
+      - backend_static:/app/collected_static
     env_file:
       - .env
     depends_on:
@@ -30,7 +30,7 @@ services:
     image: credo7/kittygram_frontend:latest
     container_name: frontend
     volumes:
-      - static:/app/build
+      - frontend_static:/app/build
     depends_on:
       - backend
     networks:
@@ -43,7 +43,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - static:/static
+      - frontend_static:/static
+      - backend_static:/backend
       - media:/media
     depends_on:
       - backend
@@ -53,7 +54,8 @@ services:
     restart: always
 
 volumes:
-  static:
+  frontend_static:
+  backend_static:
   media:
   pg_data:
 
