@@ -88,7 +88,7 @@ jobs:
             sudo docker-compose -f docker-compose.production.yml down
             
             echo "🗑️ Removing the static volume if it exists"
-            sudo docker volume rm backend_static || true
+            sudo docker volume rm kittygram_static || true
 
             echo "🚀 Starting the new containers"
             sudo docker-compose -f docker-compose.production.yml up -d
@@ -122,28 +122,12 @@ jobs:
         run: |
           pytest
 
-  telegram_notification:
-    name: Telegram Notification
-    runs-on: ubuntu-latest
-    needs: auto_tests
-    steps:
-      - name: Send successful message
-        if: success()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ${{ github.actor }} has successfully deployed in ${{ github.ref_name }} 🎉
-            Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
-
   notify_in_telegram:
-    name: Notify in Telegram
-    runs-on: ubuntu-latest
-    needs: auto_tests
-    steps:
+      name: Notify in Telegram
+      runs-on: ubuntu-latest
+      needs: auto_tests
+      steps:
       - name: Send Telegram Notification
-        if: success()
         uses: appleboy/telegram-action@v1.0.1
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -152,14 +136,3 @@ jobs:
             ✅ Kittygram Deployment Successful! 🎉
             👤 Deployed by: ${{ github.actor }}
             🌐 Access the app here: http://${{ secrets.SERVER_HOST }}
-
-      - name: Send failed message
-        if: failure()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            ❌ Kittygram Deployment Failed!
-            👤 Deployed by: ${{ github.actor }}
-            Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
