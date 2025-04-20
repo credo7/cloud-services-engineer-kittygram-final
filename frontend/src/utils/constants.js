@@ -1,4 +1,4 @@
-export const URL = "http://84.201.158.198"
+export const URL = "http://51.250.80.251"
 
 export const colorsList = [
   "#FFE4C4",
