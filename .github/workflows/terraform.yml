@@ -32,14 +32,8 @@ jobs:
       - name: 📁 Write backend config
         run: |
           cat > backend.hcl <<EOF
-          endpoint = "https://storage.yandexcloud.net"
-          bucket = "kitty-bucket"
-          key    = "tf-state/terraform.tfstate"
-          region = "ru-central1"
           access_key = "${{ secrets.YC_ACCESS_KEY }}"
           secret_key = "${{ secrets.YC_SECRET_KEY }}"
-          skip_region_validation = true
-          skip_credentials_validation = true
           EOF
 
       - name: 🔐 Restore SSH public key
