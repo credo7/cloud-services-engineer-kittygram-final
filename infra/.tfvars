@@ -18,7 +18,7 @@ vm_image_id         = "fd85m9q2qspfnsv055rh"  # Ubuntu image ID
 vm_cores            = 2
 vm_memory           = 1
 core_fraction       = 20
-vm_disk_size        = 10  # Size in GB
+vm_disk_size        = 15  # Size in GB
 vm_preemptible      = false
 
 # Security Configuration
