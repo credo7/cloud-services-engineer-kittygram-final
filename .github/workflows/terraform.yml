@@ -17,9 +17,6 @@ env:
   TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
   TF_VAR_yc_cloud_id: ${{ secrets.YC_CLOUD_ID }}
   TF_VAR_yc_folder_id: ${{ secrets.YC_FOLDER_ID }}
-  YC_TOKEN: ${{ secrets.YC_TOKEN }}
-  YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
-  YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -30,13 +27,6 @@ jobs:
     steps:
       - name: 🧾 Checkout repository
         uses: actions/checkout@v3
-
-      - name: 📁 Write backend config
-        run: |
-          cat > backend.hcl <<EOF
-          access_key = "${{ secrets.YC_ACCESS_KEY }}"
-          secret_key = "${{ secrets.YC_SECRET_KEY }}"
-          EOF
 
       - name: 🔐 Restore SSH public key
         run: |
@@ -59,7 +49,10 @@ jobs:
           echo '}' >> ~/.terraformrc
 
       - name: 🔧 Terraform Init
-        run: terraform init -backend-config=backend.hcl --var-file='.tfvars'
+        run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
+        env:
+          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
 
       - name: 🔍 Terraform Plan
         if: ${{ github.event.inputs.action == 'plan' }}
