@@ -62,40 +62,6 @@ jobs:
         if: ${{ github.event.inputs.action == 'apply' }}
         run: terraform apply -auto-approve --var-file='.tfvars'
 
-      - name: ⏱ Wait for cloud-init to complete (optional)
-        if: ${{ github.event.inputs.action == 'apply' }}
-        run: |
-          echo "Waiting for cloud-init to complete..."
-
-          # SSH parameters
-          INSTANCE_IP=$(terraform output -raw kittygram_vm_public_ip)
-          SSH_KEY_PATH=~/.ssh/id_ed25519
-          USER=user
-
-          TIMEOUT=600  # Max wait time (seconds)
-          INTERVAL=30  # Check every 30 seconds
-          ELAPSED=0
-
-          # Check cloud-init status
-          while [ $ELAPSED -lt $TIMEOUT ]; do
-            # Check if cloud-init is finished (you can adjust this based on your cloud-init setup)
-            STATUS=$(ssh -o StrictHostKeyChecking=no -i $SSH_KEY_PATH $USER@$INSTANCE_IP "cloud-init status --wait")
-
-            if [[ "$STATUS" == "finished" ]]; then
-              echo "Cloud-init completed successfully!"
-              break
-            fi
-
-            echo "Cloud-init still in progress. Waiting..."
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
-          done
-
-          if [ $ELAPSED -ge $TIMEOUT ]; then
-            echo "Cloud-init did not complete within the expected time."
-            exit 1
-          fi
-
       - name: 💣 Terraform Destroy
         if: ${{ github.event.inputs.action == 'destroy' }}
         run: terraform destroy -auto-approve --var-file='.tfvars'
