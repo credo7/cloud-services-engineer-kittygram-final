@@ -1,0 +1,51 @@
+#cloud-config
+
+users:
+  - name: ubuntu
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ466S6HQuQRL5+m54sj5VYV3HQdNiqO3QRuHmK7LYnX vitaly.credo@gmail.com
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - git
+
+write_files:
+  - path: /etc/apt/keyrings/docker-archive-keyring.gpg
+    content: |
+      -----BEGIN PGP MESSAGE-----
+      # leave empty, gpg key will be fetched below
+      -----END PGP MESSAGE-----
+    permissions: '0644'
+
+runcmd:
+  - |
+    # Remove old Docker versions if any
+    apt-get remove -y docker docker-engine docker.io containerd runc || true
+
+    # Install Docker for Ubuntu 22.04
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-archive-keyring.gpg
+
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu jammy stable" \
+      > /etc/apt/sources.list.d/docker.list
+
+    apt-get update -o Acquire::ForceIPv4=true
+    apt-get install -y -o Acquire::ForceIPv4=true docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+    # Add ubuntu to docker group (already handled above but safe to keep)
+    usermod -aG docker ubuntu
+
+    # Set up app directory
+    mkdir -p /home/ubuntu/kittygram
+    chown ubuntu:ubuntu /home/ubuntu/kittygram

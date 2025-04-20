@@ -1,0 +1,98 @@
+name: Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Select the Terraform action'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+env:
+  TF_VAR_yc_token: ${{ secrets.YC_TOKEN }}
+  TF_VAR_yc_cloud_id: ${{ secrets.YC_CLOUD_ID }}
+  TF_VAR_yc_folder_id: ${{ secrets.YC_FOLDER_ID }}
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra
+
+    steps:
+      - name: 🧾 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 📁 Write backend config
+        run: |
+          cat > backend.hcl <<EOF
+          endpoint = "https://storage.yandexcloud.net"
+          bucket = "kitty-bucket"
+          key    = "tf-state/terraform.tfstate"
+          region = "ru-central1"
+          access_key = "${{ secrets.YC_ACCESS_KEY }}"
+          secret_key = "${{ secrets.YC_SECRET_KEY }}"
+          skip_region_validation = true
+          skip_credentials_validation = true
+          EOF
+
+      - name: 🔐 Restore SSH public key
+        run: echo "${{ secrets.SSH_PUB_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519.pub
+
+      - name: 🛠 Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: 🔧 Terraform Init
+        run: terraform init -backend-config=backend.hcl --var-file='.tfvars'
+
+      - name: 🔍 Terraform Plan
+        if: ${{ github.event.inputs.action == 'plan' }}
+        run: terraform plan --var-file='.tfvars'
+
+      - name: 🚀 Terraform Apply
+        if: ${{ github.event.inputs.action == 'apply' }}
+        run: terraform apply -auto-approve --var-file='.tfvars'
+
+      - name: ⏱ Wait for cloud-init to complete (optional)
+        if: ${{ github.event.inputs.action == 'apply' }}
+        run: |
+          echo "Waiting for cloud-init to complete..."
+
+          # SSH parameters
+          INSTANCE_IP=$(terraform output -raw kittygram_vm_public_ip)
+          SSH_KEY_PATH=~/.ssh/id_ed25519
+          USER=ubuntu
+
+          TIMEOUT=600  # Max wait time (seconds)
+          INTERVAL=30  # Check every 30 seconds
+          ELAPSED=0
+
+          # Check cloud-init status
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            # Check if cloud-init is finished (you can adjust this based on your cloud-init setup)
+            STATUS=$(ssh -o StrictHostKeyChecking=no -i $SSH_KEY_PATH $USER@$INSTANCE_IP "cloud-init status --wait")
+
+            if [[ "$STATUS" == "finished" ]]; then
+              echo "Cloud-init completed successfully!"
+              break
+            fi
+
+            echo "Cloud-init still in progress. Waiting..."
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "Cloud-init did not complete within the expected time."
+            exit 1
+          fi
+
+      - name: 💣 Terraform Destroy
+        if: ${{ github.event.inputs.action == 'destroy' }}
+        run: terraform destroy -auto-approve --var-file='.tfvars'

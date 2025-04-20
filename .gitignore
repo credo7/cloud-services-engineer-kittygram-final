@@ -1,1 +1,7 @@
 .DS_Store
+local.tfvars
+key.json
+.terraform/
+.terraform.lock.hcl
+backend.hcl
+/.idea/
