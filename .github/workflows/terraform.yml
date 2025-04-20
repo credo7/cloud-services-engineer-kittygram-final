@@ -48,11 +48,11 @@ jobs:
           echo '  }' >> ~/.terraformrc
           echo '}' >> ~/.terraformrc
 
-      - name: 🔧 Terraform Init
-        run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
-        env:
-          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
-          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
+#      - name: 🔧 Terraform Init
+#        run: terraform init -backend-config="access_key=$ACCESS_KEY" -backend-config="secret_key=$SECRET_KEY"
+#        env:
+#          ACCESS_KEY: ${{ secrets.YC_ACCESS_KEY }}
+#          SECRET_KEY: ${{ secrets.YC_SECRET_KEY }}
 
       - name: 🔍 Terraform Plan
         if: ${{ github.event.inputs.action == 'plan' }}
