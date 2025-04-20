@@ -1,51 +1,63 @@
 #cloud-config
+ssh_pwauth: no
 
 users:
   - name: ubuntu
-    groups: sudo, docker
+    sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /bin/bash
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ466S6HQuQRL5+m54sj5VYV3HQdNiqO3QRuHmK7LYnX vitaly.credo@gmail.com
 
 package_update: true
 package_upgrade: true
 
-packages:
-  - apt-transport-https
-  - ca-certificates
-  - curl
-  - gnupg
-  - lsb-release
-  - git
-
 write_files:
-  - path: /etc/apt/keyrings/docker-archive-keyring.gpg
+  - path: /root/vm_prep.sh
+    permissions: "0740"
     content: |
-      -----BEGIN PGP MESSAGE-----
-      # leave empty, gpg key will be fetched below
-      -----END PGP MESSAGE-----
-    permissions: '0644'
+      #!/bin/bash
+      set -e
+
+      echo "Updating apt..."
+      until apt-get update; do sleep 5; done
+
+      echo "Installing prerequisites..."
+      apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release \
+        git
+
+      echo "Setting up Docker repository..."
+      mkdir -p /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+        gpg --dearmor -o /etc/apt/keyrings/docker-archive-keyring.gpg
+
+      echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker-archive-keyring.gpg] \
+        https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+        > /etc/apt/sources.list.d/docker.list
+
+      echo "Installing Docker and Compose plugin..."
+      apt-get update -o Acquire::ForceIPv4=true
+      apt-get install -y -o Acquire::ForceIPv4=true docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+      echo "Adding ubuntu user to docker group..."
+      groupadd -f docker
+      usermod -aG docker ubuntu
+
+      echo "Enabling Docker service..."
+      systemctl enable docker
+      systemctl start docker
+
+      echo "Creating workdir..."
+      mkdir -p /home/ubuntu/kittygram
+      chown ubuntu:ubuntu /home/ubuntu/kittygram
+      
+      echo "Cloning Kittygram project..."
+      su - ubuntu -c "git clone https://github.com/credo7/cloud-services-engineer-kittygram-final.git ~/kittygram"
 
 runcmd:
-  - |
-    # Remove old Docker versions if any
-    apt-get remove -y docker docker-engine docker.io containerd runc || true
-
-    # Install Docker for Ubuntu 22.04
-    mkdir -p /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker-archive-keyring.gpg
-
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu jammy stable" \
-      > /etc/apt/sources.list.d/docker.list
-
-    apt-get update -o Acquire::ForceIPv4=true
-    apt-get install -y -o Acquire::ForceIPv4=true docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-    # Add ubuntu to docker group (already handled above but safe to keep)
-    usermod -aG docker ubuntu
-
-    # Set up app directory
-    mkdir -p /home/ubuntu/kittygram
-    chown ubuntu:ubuntu /home/ubuntu/kittygram
+  - /root/vm_prep.sh
