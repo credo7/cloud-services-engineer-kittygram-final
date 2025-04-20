@@ -46,6 +46,18 @@ jobs:
       - name: 🛠 Setup Terraform
         uses: hashicorp/setup-terraform@v1
 
+      - name: 📝 Create ~/.terraformrc to configure provider installation
+        run: |
+          echo 'provider_installation {' > ~/.terraformrc
+          echo '  network_mirror {' >> ~/.terraformrc
+          echo '    url     = "https://terraform-mirror.yandexcloud.net/"' >> ~/.terraformrc
+          echo '    include = ["registry.terraform.io/*/*"]' >> ~/.terraformrc
+          echo '  }' >> ~/.terraformrc
+          echo '  direct {' >> ~/.terraformrc
+          echo '    exclude = ["registry.terraform.io/*/*"]' >> ~/.terraformrc
+          echo '  }' >> ~/.terraformrc
+          echo '}' >> ~/.terraformrc
+
       - name: 🔧 Terraform Init
         run: terraform init -backend-config=backend.hcl --var-file='.tfvars'
 
