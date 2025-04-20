@@ -43,7 +43,9 @@ jobs:
           EOF
 
       - name: 🔐 Restore SSH public key
-        run: echo "${{ secrets.SSH_PUB_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519.pub
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PUB_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519.pub
 
       - name: 🛠 Setup Terraform
         uses: hashicorp/setup-terraform@v1
